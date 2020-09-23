@@ -1,0 +1,8 @@
+POST http://localhost:3003/api/blogs
+Content-Type: application/json
+
+{
+    "title" : "namaloom",
+    "author": "koi nhi",
+    "likes" : -112
+}
