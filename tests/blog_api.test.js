@@ -10,14 +10,25 @@ const test_helper = require('../../backend_part/test/test_helper')
 const { before } = require('lodash')
 const { Mongoose } = require('mongoose')
 const blog = require('../models/blog')
+const User = require('../models/user')
 
 beforeEach(async () => {
     await Blog.deleteMany({})
+    await User.deleteMany({})
+
+    // console.log("before each ...............")
+
+    const userObjects = helper.initialUsers.map(x => new User(x))
+    const promiseArray = userObjects.map(x => x.save())
+    await Promise.all(promiseArray)
 
     const blogsobjects = helper.initialBlogs.map((x) => new Blog(x))
-    const promiseArray = blogsobjects.map(x => x.save())
+    const promiseArray1 = blogsobjects.map(x => x.save())
 
-    await Promise.all(promiseArray)
+    await Promise.all(promiseArray1)
+
+
+    // console.log("END......before each ...............")
 
 })
 
@@ -116,9 +127,10 @@ describe('adding blog in DB', () => {
 
     })
 
-    describe('Deleteing a ablog', () => {
-        test.only('delete blog with id', async () => {
-           
+})
+describe('Deleteing a ablog', () => {
+    test('delete blog with id', async () => {
+
         const blogs = await helper.blogsInDB()
 
         let id = "none"
@@ -128,14 +140,35 @@ describe('adding blog in DB', () => {
             }
         })
 
-            await api.delete(`/api/blogs/${id}`)
+        await api.delete(`/api/blogs/${id}`)
             .expect(204)
+            .expect(error.name)
 
-        })
     })
-
-
 })
+
+
+
+describe('Users creation', () => {
+
+    test.only('invalid user are not created', async () => {
+        const newUser = {
+            naem: 'akram',
+            username: 'alishah'
+        }
+
+        const result = await api.post('/api/users')
+            .send(newUser)
+            .expect(400)
+
+        expect(result.body.error).toContain("password missing")
+
+        const userAfterPost = await helper.usersInDb()
+
+        expect(userAfterPost.length).toBe(helper.initialUsers.length)
+    })
+})
+
 
 afterAll(
     () => {

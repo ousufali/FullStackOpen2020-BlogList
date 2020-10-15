@@ -1,8 +1,9 @@
 POST http://localhost:3003/api/blogs
 Content-Type: application/json
+Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im91c3VmYWxpIiwiaWQiOiI1Zjg4YTZkNWFmYTFlOTM4YTJlYTZmOWUiLCJpYXQiOjE2MDI3OTI5MDN9.AYa9mDwte7RM6zBDpenrvAWwjfseDCtRSC0F2QLPeI0
 
 {
-    "title" : "namaloom",
-    "author": "koi nhi",
-    "likes" : -112
+    "title" : "ami abo chah mama",
+    "author": "beta",
+    "likes" : 4
 }

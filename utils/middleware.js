@@ -1,4 +1,5 @@
 const logger = require('./logger')
+const { response } = require('../app')
 
 const requestLogger = (req, res, next) => {
     logger.info('Method:', req.method)
@@ -11,19 +12,23 @@ const requestLogger = (req, res, next) => {
 }
 
 const unknownEndPoint = (request, response) => {
-    response.status(400).send({ erroe: 'Unknown endpoint' })
+    response.status(400).send({ error: 'Unknown endpoint' })
 }
 
-const errorHandler = (error, request, response, next) => {
-
-    logger.error(`ErrorMessage:: ${error.message}`)
+const errorHandler = (error, req, res, next) => {
+    logger.error(error.message)
 
     if (error.name === 'CastError') {
-        response.status(400).send({ error: 'Malformed id.' })
-    } else if (error.name === 'ValidationError')
-    {
-        response.status(400).json({error : error.message})
+        return res.status(400).send({ error: 'malformed id' })
+    } else if (error.name === 'ValidationError') {
+        return res.status(400).json({ error: error.message })
+
     }
+    else if (error.name === 'JsonWebTokenError') {
+        return res.status(401).json({ error: 'invalid token' })
+    }
+
+    logger.error(error.message)
     next(error)
 }
 module.exports = {
