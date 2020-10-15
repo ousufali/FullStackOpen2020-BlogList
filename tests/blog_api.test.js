@@ -17,10 +17,12 @@ beforeEach(async () => {
     await User.deleteMany({})
 
     // console.log("before each ...............")
-
-    const userObjects = helper.initialUsers.map(x => new User(x))
-    const promiseArray = userObjects.map(x => x.save())
-    await Promise.all(promiseArray)
+    await api.post('/api/users')
+        .send({
+            "name": "admin",
+            "username": "root",
+            "password": "admin"
+        })
 
     const blogsobjects = helper.initialBlogs.map((x) => new Blog(x))
     const promiseArray1 = blogsobjects.map(x => x.save())
@@ -63,16 +65,29 @@ describe('adding blog in DB', () => {
 
     test('successful post request', async () => {
 
+        const userInDb = await helper.usersInDb()
+        console.log("..............USER in DB............................")
+        console.log("userinDB:   ", userInDb)
+        console.log("..............USER in DB.......END.....................")
+
+
+        const rootTokenObject = await api.post('/api/login')
+            .send({ username: userInDb[0].username, password: "admin" })
+
+        console.log("roottokenobject token:   ", rootTokenObject.body.token)
+
         const newblog = {
             title: "No work",
-            author: "yousuf ali",
+            author: "nobody",
             url: "google.com/",
             likes: 0,
+            user: userInDb.id
         }
 
         await api.post('/api/blogs')
             .send(newblog)
-            .expect(201)
+            .set('Authorization', `bearer ${rootTokenObject.body.token}`)
+            .expect(200)
             .expect('Content-type', /application\/json/)
 
         const blogsafterpost = await helper.blogsInDB()
@@ -80,6 +95,36 @@ describe('adding blog in DB', () => {
 
         const titles = blogsafterpost.map(x => x.title)
         expect(titles).toContain(newblog.title)
+    })
+
+    test.only('Unauthorized, token is not provided', async () => {
+
+        // const userInDb = await helper.usersInDb()
+
+
+        // const rootTokenObject = await api.post('/api/login')
+        //     .send({ username: "root", password: "admin" })
+
+        const token = null
+
+        const newblog = {
+            title: "No work",
+            author: "nobody",
+            url: "google.com/",
+            likes: 0,
+            user: "root"
+        }
+
+        const result = await api.post('/api/blogs')
+            .send(newblog)
+            .set('Authorization', `bearer ${null}`)
+            .expect(401)
+    
+            expect(result.body.error).toEqual('invalid token')
+
+        const blogsafterpost = await helper.blogsInDB()
+        expect(blogsafterpost).toHaveLength(helper.initialBlogs.length)
+
     })
 
     test('If blog is missing likes, default will be 0. ', async () => {
@@ -151,7 +196,8 @@ describe('Deleteing a ablog', () => {
 
 describe('Users creation', () => {
 
-    test.only('invalid user are not created', async () => {
+    test('invalid user are not created', async () => {
+        const userBeforePost = await helper.usersInDb()
         const newUser = {
             naem: 'akram',
             username: 'alishah'
@@ -165,7 +211,7 @@ describe('Users creation', () => {
 
         const userAfterPost = await helper.usersInDb()
 
-        expect(userAfterPost.length).toBe(helper.initialUsers.length)
+        expect(userAfterPost.length).toBe(userBeforePost.length)
     })
 })
 
