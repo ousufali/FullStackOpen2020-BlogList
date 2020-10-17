@@ -5,6 +5,7 @@ Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im91c
 {
     "title" : "ami abo",
     "author": "beta",
+    "url" : "abu.com",
     "likes" : 4
 }
 
