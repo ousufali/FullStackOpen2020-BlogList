@@ -71,7 +71,7 @@ blogrouter
         }
 
         const blogToDelete = await Blog.findById(request.params.id)
-        console.log("blog to delete:   ",blogToDelete)
+        console.log("blog to delete:   ", blogToDelete)
 
         if (blogToDelete.user.toString() === decodedToken.id.toString()) {
             await Blog.findByIdAndRemove(request.params.id)
@@ -91,23 +91,26 @@ blogrouter
 blogrouter
     .put('/:id', async (request, response, next) => {
         try {
-            const blogs = await Blog.find({})
-            let obj
-            blogs.forEach(x => {
-                if (x.id === request.params.id) {
-                    obj = x
-                }
-            });
+            console.log("...............Updating..................")
+
+            const decodedToken = await jwt.verify(request.token, process.env.SECRET)
+            console.log("decoded token:  ", decodedToken)
+            if (!decodedToken) {
+                return response.status(401).json({ error: "invalid or missing token" })
+            }
+
             // console.log("...............OBJ..................")
             // console.log(obj)
             // console.log("..................................")
-            const updateObj = { title: obj.title, author: obj.author, url: obj.url, likes: 10000, }
-            // console.log(".............updated..OBJ..................")
+            // const updateObj = { title: obj.title, author: obj.author, url: obj.url, likes: obj.likes, }
+            console.log(".............updated..OBJ..................")
             // console.log(updateObj)
-            // console.log("..................................")
+            const updatedObject = request.body
+            console.log(updatedObject)
+            console.log("..................................")
 
 
-            const updatedBlog = await Blog.findByIdAndUpdate(request.params.id, updateObj, { new: true })
+            const updatedBlog = await Blog.findByIdAndUpdate(request.params.id, updatedObject, { new: true })
             return response.json(updatedBlog)
 
 
